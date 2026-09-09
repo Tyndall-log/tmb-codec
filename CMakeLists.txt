@@ -35,6 +35,9 @@ target_include_directories(teeth_mesh_codec PUBLIC
 
 if(MSVC)
     target_compile_options(teeth_mesh_codec PRIVATE /fp:strict /utf-8 /W4)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(teeth_mesh_codec PRIVATE /clang:-msse4.1)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(teeth_mesh_codec PRIVATE -Wall -Wextra -Wpedantic)
 endif()

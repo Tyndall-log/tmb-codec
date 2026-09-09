@@ -36,7 +36,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure
       - name: Install
         run: cmake --install build --prefix stage
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: teeth-mesh-codec-${{ runner.os }}-${{ runner.arch }}
           path: stage
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: mymindstorm/setup-emsdk@v14
+      - uses: mymindstorm/setup-emsdk@v16
         with:
           version: 4.0.15
           actions-cache-folder: emsdk-cache
@@ -62,7 +62,7 @@ jobs:
           cp include/teeth_mesh_codec.h stage/include/
           cp licenses/CORTO_LICENSE.txt stage/licenses/
           cp README.md LICENSE THIRD_PARTY_NOTICES.md stage/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: teeth-mesh-codec-WASM-wasm32
           path: stage
@@ -72,7 +72,7 @@ jobs:
     needs: [native, wasm]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: release-artifacts
       - name: Package
