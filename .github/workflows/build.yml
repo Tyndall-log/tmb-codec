@@ -1,0 +1,36 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DTMB_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.15
+          actions-cache-folder: emsdk-cache
+      - name: Configure
+        run: emcmake cmake -S . -B build-wasm -DTMB_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build-wasm --parallel
+      - name: Test
+        run: node tests/wasm_smoke.mjs build-wasm/teeth_mesh_codec.js
