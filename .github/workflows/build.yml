@@ -4,33 +4,84 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   native:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            compiler: clang-cl
+          - os: macos-latest
+            compiler: clang++
+          - os: ubuntu-latest
+            compiler: clang++
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - name: Verify Clang
+        run: ${{ matrix.compiler }} --version
       - name: Configure
-        run: cmake -S . -B build -DTMB_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+        run: >-
+          cmake -S . -B build -G Ninja
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+          -DTMB_BUILD_TESTS=ON
+          -DCMAKE_BUILD_TYPE=Release
       - name: Build
-        run: cmake --build build --config Release --parallel
+        run: cmake --build build --parallel
       - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure
+        run: ctest --test-dir build --output-on-failure
+      - name: Install
+        run: cmake --install build --prefix stage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: teeth-mesh-codec-${{ runner.os }}-${{ runner.arch }}
+          path: stage
 
   wasm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: mymindstorm/setup-emsdk@v14
         with:
           version: 4.0.15
           actions-cache-folder: emsdk-cache
       - name: Configure
-        run: emcmake cmake -S . -B build-wasm -DTMB_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release
+        run: emcmake cmake -S . -B build-wasm -G Ninja -DTMB_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build-wasm --parallel
       - name: Test
         run: node tests/wasm_smoke.mjs build-wasm/teeth_mesh_codec.js
+      - name: Stage
+        run: |
+          mkdir -p stage/include stage/licenses
+          cp build-wasm/teeth_mesh_codec.js build-wasm/teeth_mesh_codec.wasm stage/
+          cp include/teeth_mesh_codec.h stage/include/
+          cp licenses/CORTO_LICENSE.txt stage/licenses/
+          cp README.md LICENSE THIRD_PARTY_NOTICES.md stage/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: teeth-mesh-codec-WASM-wasm32
+          path: stage
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [native, wasm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+      - name: Package
+        run: |
+          for directory in release-artifacts/*; do
+            name=$(basename "$directory")
+            (cd "$directory" && zip -r "../../${name}.zip" .)
+          done
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" ./*.zip --verify-tag --generate-notes

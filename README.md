@@ -2,6 +2,7 @@
 
 TMB1 is a compact triangle-mesh codec for dental inference and transport. The
 library provides one C ABI across Windows, macOS, Linux, and WebAssembly.
+Native CI builds use Clang (`clang-cl` on Windows and `clang++` elsewhere).
 
 ## Features
 
@@ -44,6 +45,10 @@ node tests/wasm_smoke.mjs build-wasm/teeth_mesh_codec.js
 
 The WASM build emits `teeth_mesh_codec.js` and `teeth_mesh_codec.wasm` with
 memory growth enabled and exports the five public TMB functions plus malloc/free.
+
+Every push and pull request builds, tests, and stores artifacts for all four
+platforms. Pushing a `v*` tag publishes those artifacts as a GitHub Release only
+after every platform job succeeds.
 
 ## C API
 

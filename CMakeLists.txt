@@ -16,7 +16,7 @@ if(EMSCRIPTEN)
         "-sALLOW_MEMORY_GROWTH=1"
         "-sFILESYSTEM=0"
         "-sEXPORTED_FUNCTIONS=['_tmb_encode_lossless','_tmb_decode_lossless','_tmb_encode_quantized','_tmb_decode_quantized','_tmb_free','_malloc','_free']"
-        "-sEXPORTED_RUNTIME_METHODS=['cwrap']")
+        "-sEXPORTED_RUNTIME_METHODS=['cwrap','HEAPU8','HEAPU32','HEAPF32']")
 else()
     add_library(teeth_mesh_codec SHARED src/teeth_mesh_codec.cpp)
     set_target_properties(teeth_mesh_codec PROPERTIES
