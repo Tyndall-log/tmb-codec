@@ -1,4 +1,4 @@
-#include "teeth_mesh_codec.h"
+#include "tmb_codec.h"
 
 #include <algorithm>
 #include <array>

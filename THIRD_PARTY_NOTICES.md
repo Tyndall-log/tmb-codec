@@ -1,6 +1,6 @@
 # Third-party notices
 
-`src/teeth_mesh_codec.cpp` incorporates and modifies code from Corto by the
+`src/tmb_codec.cpp` incorporates and modifies code from Corto by the
 Visual Computing Lab, ISTI-CNR. Corto is licensed under the MIT License. The
 upstream notice is reproduced in `licenses/CORTO_LICENSE.txt` and is also kept
 inside the amalgamated source where applicable.

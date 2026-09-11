@@ -4610,7 +4610,7 @@ extern "C" int corto_decode_controlled_lossless(const unsigned char* input,size_
 extern "C" int corto_encode_exact_lossless(const float* v,uint32_t nv,const uint32_t* f,uint32_t nf,unsigned char** output,size_t* output_size,double* timings){return cortoEncodeControlled<true,true,true>(v,nv,f,nf,output,output_size,timings);}
 extern "C" int corto_decode_exact_lossless(const unsigned char* input,size_t input_size,float* vertices,uint32_t* faces,uint32_t nv,uint32_t nf,double* timings){return cortoDecodeControlled<true,true,true>(input,input_size,vertices,faces,nv,nf,timings);}
 
-// ===== TMB1: independent Teeth Mesh Binary format =====
+// ===== TMB1: independent Triangle Mesh Binary format =====
 namespace tmb {
 static constexpr uint32_t MAGIC=0x31424d54u; // "TMB1"
 static constexpr uint32_t VERSION=1u;

@@ -2,7 +2,7 @@ import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 
 const modulePath = process.argv[2];
-if (!modulePath) throw new Error("usage: node wasm_smoke.mjs <teeth_mesh_codec.js>");
+if (!modulePath) throw new Error("usage: node wasm_smoke.mjs <tmb_codec.js>");
 const createModule = (await import(pathToFileURL(resolve(modulePath)).href)).default;
 const codec = await createModule();
 

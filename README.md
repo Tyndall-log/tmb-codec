@@ -1,6 +1,6 @@
-# Teeth Mesh Codec
+# TMB Codec
 
-TMB1 is a compact triangle-mesh codec for dental inference and transport. The
+TMB1 (Triangle Mesh Binary) is a compact general-purpose triangle-mesh codec. The
 library provides one C ABI across Windows, macOS, Linux, and WebAssembly.
 Native CI builds use Clang (`clang-cl` on Windows and `clang++` elsewhere).
 
@@ -13,24 +13,44 @@ Native CI builds use Clang (`clang-cl` on Windows and `clang++` elsewhere).
 - No runtime dependency on Zstd; compress the completed TMB1 bundle once outside
   the codec when using `tmb1-zstd-v1`
 
-The segmentation transport uses `TMB_VERTEX_IDS` (`flags=1`). This restores
+Applications that require stable per-vertex data use `TMB_VERTEX_IDS` (`flags=1`). This restores
 vertex rows and triangle references to original vertex IDs while allowing face
 row order and cyclic starting corners to remain in traversal order.
 
-## Build
+## Python
+
+Install a prebuilt native wheel:
+
+```bash
+pip install tmb-codec
+```
+
+```python
+from tmb_codec import decode, encode
+
+data = encode(vertices, faces, bits=14)
+decoded_vertices, decoded_faces = decode(data)
+
+lossless = encode(vertices, faces, bits=None)
+```
+
+Wheels contain the Python API, the platform-native shared library, and license
+notices. They do not contain `src/tmb_codec.cpp` or an sdist.
+
+## Native build
 
 Windows:
 
 ```powershell
-cmake -S . -B build -A x64 -DTMB_BUILD_TESTS=ON
-cmake --build build --config Release --parallel
-ctest --test-dir build -C Release --output-on-failure
+cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang-cl -DTMB_BUILD_TESTS=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
 ```
 
 macOS and Linux:
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DTMB_BUILD_TESTS=ON
+cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DTMB_BUILD_TESTS=ON
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
@@ -40,20 +60,21 @@ WebAssembly with Emscripten:
 ```bash
 emcmake cmake -S . -B build-wasm -DCMAKE_BUILD_TYPE=Release -DTMB_BUILD_TESTS=OFF
 cmake --build build-wasm --parallel
-node tests/wasm_smoke.mjs build-wasm/teeth_mesh_codec.js
+node tests/wasm_smoke.mjs build-wasm/tmb_codec.js
 ```
 
-The WASM build emits `teeth_mesh_codec.js` and `teeth_mesh_codec.wasm` with
+The WASM build emits `tmb_codec.js` and `tmb_codec.wasm` with
 memory growth enabled and exports the five public TMB functions plus malloc/free.
 
-Every push and pull request builds, tests, and stores artifacts for all four
-platforms. Pushing a `v*` tag publishes those artifacts as a GitHub Release only
-after every platform job succeeds.
+Every push and pull request builds and installs native wheels on Windows, macOS,
+and Linux and runs the Python tests against those installed wheels. WASM has a
+separate Node.js round-trip test. Pushing a `v*` tag publishes wheels to PyPI and
+then creates a GitHub Release only after every required job succeeds.
 
 ## C API
 
 ```cpp
-#include <teeth_mesh_codec.h>
+#include <tmb_codec.h>
 
 unsigned char* bytes = nullptr;
 size_t byte_count = 0;
@@ -95,7 +116,7 @@ one integer component per axis. Coordinates from 17 through 31 bits use low/high
 16-bit components to keep prediction residuals inside signed 32-bit range.
 
 The topology and position entropy streams are defined by the reference source in
-`src/teeth_mesh_codec.cpp`. Consumers should use the provided encoder and decoder
+`src/tmb_codec.cpp`. Consumers should use the provided encoder and decoder
 unless they also maintain compatibility tests against the reference implementation.
 
 ## License
