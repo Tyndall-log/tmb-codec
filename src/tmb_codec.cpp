@@ -76,6 +76,7 @@ MIT license: see the consolidated notice at the top of this file.
 
 #include <string.h>
 #include <assert.h>
+#include <cmath>
 #include <limits>
 #include <type_traits>
 
