@@ -433,7 +433,8 @@ public:
 
 	void push(const void *b, size_t s) {
 		uchar *pos = grow(s);
-		memcpy(pos, b, s);
+		if(s)
+			memcpy(pos, b, s);
 		publish();
 	}
 
@@ -1078,8 +1079,13 @@ public:
 			break;
 
 		case INT32:
-			for(uint32_t i = 0; i < n; i++)
-				((uint32_t *)buffer)[i] *= q;
+			for(uint32_t i = 0; i < n; i++) {
+				double value = double(((uint32_t *)buffer)[i]) * double(q);
+				if(!std::isfinite(value) || value < 0 ||
+				   value > double(std::numeric_limits<uint32_t>::max()))
+					throw "Invalid quantized attribute";
+				((uint32_t *)buffer)[i] = static_cast<uint32_t>(value);
+			}
 			break;
 
 		case INT8:
