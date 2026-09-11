@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "tmb-codec"
-version = "0.2.0"
+version = "0.2.1"
 description = "Fast Triangle Mesh Binary encoding and decoding"
 readme = "README.md"
 requires-python = ">=3.10"

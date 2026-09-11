@@ -50,6 +50,12 @@ if(TMB_BUILD_TESTS AND NOT EMSCRIPTEN)
     set_target_properties(tmb_native_smoke PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
     add_test(NAME tmb_native_smoke COMMAND tmb_native_smoke)
+    add_executable(tmb_native_malformed tests/native_malformed.cpp)
+    target_compile_features(tmb_native_malformed PRIVATE cxx_std_17)
+    target_link_libraries(tmb_native_malformed PRIVATE tmb_codec)
+    set_target_properties(tmb_native_malformed PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    add_test(NAME tmb_native_malformed COMMAND tmb_native_malformed)
 endif()
 
 include(GNUInstallDirs)

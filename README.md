@@ -12,6 +12,7 @@ Native CI builds use Clang (`clang-cl` on Windows and `clang++` elsewhere).
 - Single-file C++17 implementation
 - No runtime dependency on Zstd; compress the completed TMB1 bundle once outside
   the codec when using `tmb1-zstd-v1`
+- Bounds-checked native decoding with malformed-input tests under ASan and UBSan
 
 Applications that require stable per-vertex data use `TMB_VERTEX_IDS` (`flags=1`). This restores
 vertex rows and triangle references to original vertex IDs while allowing face
@@ -124,3 +125,4 @@ unless they also maintain compatibility tests against the reference implementati
 The codec incorporates and modifies MIT-licensed Corto code. Preserve
 `licenses/CORTO_LICENSE.txt` with source and binary distributions. Project-level
 terms are in `LICENSE`; third-party attribution is in `THIRD_PARTY_NOTICES.md`.
+Security reports should follow `SECURITY.md` rather than public issues.
