@@ -67,10 +67,10 @@ node tests/wasm_smoke.mjs build-wasm/tmb_codec.js
 The WASM build emits `tmb_codec.js` and `tmb_codec.wasm` with
 memory growth enabled and exports the five public TMB functions plus malloc/free.
 
-Every push and pull request builds and installs native wheels on Windows, macOS,
-and Linux and runs the Python tests against those installed wheels. WASM has a
-separate Node.js round-trip test. Pushing a `v*` tag publishes wheels to PyPI and
-then creates a GitHub Release only after every required job succeeds.
+Every push and pull request builds native SDKs and Python wheels on Windows,
+macOS, and Linux and runs their tests. WASM has a separate Node.js round-trip
+test. Pushing a `v*` tag publishes wheels to PyPI. GitHub Releases contain the
+platform-native SDK ZIPs and the WASM ZIP; wheels remain on PyPI.
 
 ## C API
 

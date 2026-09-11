@@ -72,5 +72,7 @@ if(NOT EMSCRIPTEN)
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
         install(FILES include/tmb_codec.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
         install(FILES licenses/CORTO_LICENSE.txt DESTINATION ${CMAKE_INSTALL_DATADIR}/tmb_codec/licenses)
+        install(FILES README.md LICENSE THIRD_PARTY_NOTICES.md
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/tmb_codec)
     endif()
 endif()

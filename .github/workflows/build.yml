@@ -8,6 +8,41 @@ permissions:
   contents: read
 
 jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            compiler: clang-cl
+          - os: macos-14
+            compiler: clang++
+          - os: macos-15-intel
+            compiler: clang++
+          - os: ubuntu-latest
+            compiler: clang++
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify Clang
+        run: ${{ matrix.compiler }} --version
+      - name: Configure
+        run: >-
+          cmake -S . -B build-native -G Ninja
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+          -DTMB_BUILD_TESTS=ON
+          -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build-native --parallel
+      - name: Test
+        run: ctest --test-dir build-native --output-on-failure
+      - name: Install native SDK
+        run: cmake --install build-native --prefix stage
+      - uses: actions/upload-artifact@v5
+        with:
+          name: native-${{ runner.os }}-${{ runner.arch }}
+          path: stage
+
   wheels:
     strategy:
       fail-fast: false
@@ -120,7 +155,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [wheels, wasm, sanitizers, publish-pypi]
+    needs: [native, wheels, wasm, sanitizers, publish-pypi]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -128,20 +163,23 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v5
         with:
-          pattern: wheel-*
-          path: release-artifacts
-          merge-multiple: true
+          pattern: native-*
+          path: native-artifacts
       - uses: actions/download-artifact@v5
         with:
           name: wasm-wasm32
           path: wasm-wasm32
-      - name: Package WASM
-        run: (cd wasm-wasm32 && zip -r ../tmb-codec-WASM-wasm32.zip .)
+      - name: Package native SDKs and WASM
+        run: |
+          for directory in native-artifacts/native-*; do
+            platform="${directory#native-artifacts/native-}"
+            (cd "$directory" && zip -r "../../tmb-codec-${platform}.zip" .)
+          done
+          (cd wasm-wasm32 && zip -r ../tmb-codec-WASM-wasm32.zip .)
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: >-
           gh release create "$GITHUB_REF_NAME"
-          release-artifacts/*.whl
-          tmb-codec-WASM-wasm32.zip
+          tmb-codec-*.zip
           --verify-tag --generate-notes
