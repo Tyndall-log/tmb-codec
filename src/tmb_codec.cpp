@@ -398,7 +398,7 @@ public:
 
 	template<class T> void write(T c) {
 		uchar *pos = grow(sizeof(T));
-		*(T *)pos = c;
+		memcpy(pos, &c, sizeof(T));
 		publish();
 	}
 	template<class T> void writeArray(int count, T *c) {
