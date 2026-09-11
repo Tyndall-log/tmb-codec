@@ -4048,12 +4048,12 @@ void Tunstall::createDecodingTables2() {
 
 		uint32_t first = (count-1)*n_symbols;
 		//TSymbol &first = queues[];
+		n_words = 1 + count*(n_symbols - 1);
 		if(first >= queues.size() || end > queues.size() || n_words != pos)
 			throw "Invalid entropy table";
 		queues[first] = prob;
 		index[first] = 0;
 		lengths[first] = count;
-		n_words = 1 + count*(n_symbols - 1);
 		end = count*n_symbols;
 		assert(n_words == pos);
 
